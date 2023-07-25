@@ -13,20 +13,24 @@ from sklearn.neighbors import KNeighborsRegressor
 from sklearn.metrics import mean_squared_error, r2_score
 from PIL import Image
 
-st.title("Group Project CSC649")
-st.header("Market Price Prediction")
-st.header("Looking to make smart investment decisions in the ever-changing financial landscape? \n")
-st.write("Discover the ultimate tool that can take your investment strategies to the next level. \n Introducing our state-of-the-art prediction model designed to help you navigate the complexities of forex, stocks, commodities, cryptocurrencies, and futures markets with confidence.")
-image = Image.open('image/banner.png')
-
-st.image(image, caption='Our cutting-edge prediction model leverages the latest advancements in artificial intelligence and machine learning. Powered by robust algorithms and historical market data, it analyzes trends, patterns, and price movements to make data-driven forecasts with impressive accuracy.')
 selectDataset = st.sidebar.selectbox ("Select Dataset", options = ["Home", "Forex", "Stock","Commodity","Cryptocurrency","Futures"])
 
-image = Image.open('image/team.png')
+if selectDataset == "Home":
 
-st.image(image, caption='our team')
+    st.title("Group Project CSC649")
+    st.header("Market Price Prediction")
+    st.header("Looking to make smart investment decisions in the ever-changing financial landscape? \n")
+    st.write("Discover the ultimate tool that can take your investment strategies to the next level. \n Introducing our state-of-the-art prediction model designed to help you navigate the complexities of forex, stocks, commodities, cryptocurrencies, and futures markets with confidence.")
+    image = Image.open('image/banner.png')
 
-st.header("The key to successful investing lies in being one step ahead. Our prediction model empowers you with the knowledge and confidence to execute trades strategically, minimizing risks, and maximizing potential gains.")
+    st.image(image, caption='Our cutting-edge prediction model leverages the latest advancements in artificial intelligence and machine learning. Powered by robust algorithms and historical market data, it analyzes trends, patterns, and price movements to make data-driven forecasts with impressive accuracy.')
+    
+
+    image = Image.open('image/team.png')
+
+    st.image(image, caption='our team')
+
+    st.header("The key to successful investing lies in being one step ahead. Our prediction model empowers you with the knowledge and confidence to execute trades strategically, minimizing risks, and maximizing potential gains.")
 
 #FOREX PRICE
 if selectDataset == "Forex":
@@ -36,10 +40,22 @@ if selectDataset == "Forex":
     forex_dataset = pd.read_csv('eurusd_hour.csv')
     forex_dataset
 
+
+
+
     df = pd.DataFrame(forex_dataset)
+    
     st.subheader("Data input for Forex")
-    data_input_training = df.drop(columns=['BC','Date','Time'])  
+    data_input_training = df.drop(columns=['BC','Date','Time','MINUTE'])  
     data_input_training
+
+    missing_values = data_input_training.isnull().sum()
+
+    st.subheader("Missing Values:")
+    st.write(missing_values)
+
+    
+
 
     st.subheader("Data target for Forex")
     data_target_training = df['BC']
@@ -48,7 +64,7 @@ if selectDataset == "Forex":
     st.subheader("Training and testing data will be divided using Train_Test_Split")
     X = data_input_training
     y = data_target_training
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=42)
 
     st.subheader("Training data for input and target")
     st.write("Training Data Input")
@@ -119,83 +135,89 @@ if selectDataset == "Forex":
 
 #SVM
     elif selectModel == "Support Vector Machine":
-
-       
-
-        st.subheader("Support Vector Machine age estimation model")
-        st.write(" ")
-        st.subheader("RBF")
-        svm_model = SVR(kernel="rbf")
-        st.write("Training the Model...")
-        svm_model.fit(X_train, y_train)
-
-        st.write("Successfully Train the model")
-
-        st.write("SVM", "rbf", "Prediction")
-        prediction = svm_model.predict(X_test)
-        st.write("Predicted result for RBF Testing Dataset: ")
-        prediction
-
-        svm = mean_squared_error(y_test,prediction)
-        st.write("mean squared error: for kernel", "rbf" , svm)
         
-        sc= np.round(svm_model.score(X_test, y_test),2)*100
-        st.write("Accuracy score:", sc)
+        selectKernel = st.sidebar.selectbox ("Select Kernel", options = ["RBF", "Linear", "Sigmoid", "Poly"])
+       
+        if selectKernel == "RBF":
+            st.subheader("Support Vector Machine age estimation model")
+            st.write(" ")
+            st.subheader("RBF")
+            svm_model = SVR(kernel="rbf")
+            st.write("Training the Model...")
+            svm_model.fit(X_train, y_train)
 
-        st.write(" ")
-        st.subheader("Linear")
-        svm_model = SVR(kernel="linear")
-        st.write("Training the Model...")
-        svm_model.fit(X_train, y_train)
+            st.write("Successfully Train the model")
 
-        st.write("Successfully Train the model")
+            st.write("SVM", "rbf", "Prediction")
+            prediction = svm_model.predict(X_test)
+            st.write("Predicted result for RBF Testing Dataset: ")
+            prediction
 
-        st.write("SVM", "linear", "Prediction")
-        prediction = svm_model.predict(X_test)
-        st.write("Predicted result for linear Testing Dataset: ")
-        prediction
+            svm = mean_squared_error(y_test,prediction)
+            st.write("mean squared error: for kernel", "rbf" , svm)
+            
+            sc= np.round(svm_model.score(X_test, y_test),2)*100
+            st.write("Accuracy score:", sc)
 
-        svm = mean_squared_error(y_test,prediction)
-        st.write("mean squared error: for kernel", "linear" , svm)
-        sc= np.round(svm_model.score(X_test, y_test),2)*100
-        st.write("Accuracy score:", sc)
+            st.write(" ")
+
+        elif selectKernel == "Linear":
+            st.subheader("Linear")
+            svm_model = SVR(kernel="linear")
+            st.write("Training the Model...")
+            svm_model.fit(X_train, y_train)
+
+            st.write("Successfully Train the model")
+
+            st.write("SVM", "linear", "Prediction")
+            prediction = svm_model.predict(X_test)
+            st.write("Predicted result for linear Testing Dataset: ")
+            prediction
+
+            svm = mean_squared_error(y_test,prediction)
+            st.write("mean squared error: for kernel", "linear" , svm)
+            sc= np.round(svm_model.score(X_test, y_test),2)*100
+            st.write("Accuracy score:", sc)
 
 
-        st.write(" ")
-        st.subheader("Poly")
-        svm_model = SVR(kernel="poly")
-        st.write("Training the Model...")
-        svm_model.fit(X_train, y_train)
+            st.write(" ")
 
-        st.write("Successfully Train the model")
+        elif selectKernel == "Poly":
+            st.subheader("Poly")
+            svm_model = SVR(kernel="poly")
+            st.write("Training the Model...")
+            svm_model.fit(X_train, y_train)
 
-        st.write("SVM", "poly", "Prediction")
-        prediction = svm_model.predict(X_test)
-        st.write("Predicted result for poly Testing Dataset: ")
-        prediction
+            st.write("Successfully Train the model")
 
-        svm = mean_squared_error(y_test,prediction)
-        st.write("mean squared error: for kernel", "poly" , svm)
-        sc= np.round(svm_model.score(X_test, y_test),2)*100
-        st.write("Accuracy score:", sc)
+            st.write("SVM", "poly", "Prediction")
+            prediction = svm_model.predict(X_test)
+            st.write("Predicted result for poly Testing Dataset: ")
+            prediction
 
-        st.write(" ")
-        st.subheader("Sigmoid")
-        svm_model = SVR(kernel="sigmoid")
-        st.write("Training the Model...")
-        svm_model.fit(X_train, y_train)
+            svm = mean_squared_error(y_test,prediction)
+            st.write("mean squared error: for kernel", "poly" , svm)
+            sc= np.round(svm_model.score(X_test, y_test),2)*100
+            st.write("Accuracy score:", sc)
 
-        st.write("Successfully Train the model")
+            st.write(" ")
+        elif selectKernel == "Sigmoid":
+            st.subheader("Sigmoid")
+            svm_model = SVR(kernel="sigmoid")
+            st.write("Training the Model...")
+            svm_model.fit(X_train, y_train)
 
-        st.write("SVM", "sigmoid", "Prediction")
-        prediction = svm_model.predict(X_test)
-        st.write("Predicted result for sigmoid Testing Dataset: ")
-        prediction
+            st.write("Successfully Train the model")
 
-        svm = mean_squared_error(y_test,prediction)
-        st.write("mean squared error: for kernel", "sigmoid", svm)
-        sc= np.round(svm_model.score(X_test, y_test),2)*100
-        st.write("Accuracy score:", sc)
+            st.write("SVM", "sigmoid", "Prediction")
+            prediction = svm_model.predict(X_test)
+            st.write("Predicted result for sigmoid Testing Dataset: ")
+            prediction
+
+            svm = mean_squared_error(y_test,prediction)
+            st.write("mean squared error: for kernel", "sigmoid", svm)
+            sc= np.round(svm_model.score(X_test, y_test),2)*100
+            st.write("Accuracy score:", sc)
         
 
 
@@ -337,94 +359,88 @@ elif selectDataset == "Stock":
 #SVM
     elif selectModel == "Support Vector Machine":
 
-        st.subheader("Support Vector Machine age estimation model")
-        st.write(" ")
-        st.subheader("RBF")
-        svm_model = SVR(kernel="rbf")
-        st.write("Training the Model...")
-        svm_model.fit(X_train, y_train)
+        selectKernel = st.sidebar.selectbox ("Select Kernel", options = ["RBF", "Linear", "Sigmoid", "Poly"])
+       
+        if selectKernel == "RBF":
+            st.subheader("Support Vector Machine age estimation model")
+            st.write(" ")
+            st.subheader("RBF")
+            svm_model = SVR(kernel="rbf")
+            st.write("Training the Model...")
+            svm_model.fit(X_train, y_train)
 
-        st.write("Successfully Train the model")
+            st.write("Successfully Train the model")
 
-        st.write("SVM", "rbf", "Prediction")
-        prediction = svm_model.predict(X_test)
-        st.write("Predicted result for RBF Testing Dataset: ")
-        prediction
+            st.write("SVM", "rbf", "Prediction")
+            prediction = svm_model.predict(X_test)
+            st.write("Predicted result for RBF Testing Dataset: ")
+            prediction
 
-        svm = mean_squared_error(y_test,prediction)
-        st.write("mean squared error: for kernel", "rbf" , svm)
-        
-        sc= np.round(svm_model.score(X_test, y_test),2)*100
-        st.write("Accuracy score:", sc)
-        from sklearn.metrics import r2_score
-        rbfr2=np.round(r2_score(y_test,prediction),2)
-        st.write("R2 score:", rbfr2)
+            svm = mean_squared_error(y_test,prediction)
+            st.write("mean squared error: for kernel", "rbf" , svm)
+            
+            sc= np.round(svm_model.score(X_test, y_test),2)*100
+            st.write("Accuracy score:", sc)
 
+            st.write(" ")
 
-        st.write(" ")
-        st.subheader("Linear")
-        svm_model = SVR(kernel="linear")
-        st.write("Training the Model...")
-        svm_model.fit(X_train, y_train)
+        elif selectKernel == "Linear":
+            st.subheader("Linear")
+            svm_model = SVR(kernel="linear")
+            st.write("Training the Model...")
+            svm_model.fit(X_train, y_train)
 
-        st.write("Successfully Train the model")
+            st.write("Successfully Train the model")
 
-        st.write("SVM", "linear", "Prediction")
-        prediction = svm_model.predict(X_test)
-        st.write("Predicted result for linear Testing Dataset: ")
-        prediction
+            st.write("SVM", "linear", "Prediction")
+            prediction = svm_model.predict(X_test)
+            st.write("Predicted result for linear Testing Dataset: ")
+            prediction
 
-        svm = mean_squared_error(y_test,prediction)
-        st.write("mean squared error: for kernel", "linear" , svm)
-        sc= np.round(svm_model.score(X_test, y_test),2)*100
-        st.write("Accuracy score:", sc)
-        from sklearn.metrics import r2_score
-        linearr2=np.round(r2_score(y_test,prediction),2)
-        st.write("R2 score:", linearr2)
+            svm = mean_squared_error(y_test,prediction)
+            st.write("mean squared error: for kernel", "linear" , svm)
+            sc= np.round(svm_model.score(X_test, y_test),2)*100
+            st.write("Accuracy score:", sc)
 
 
-        st.write(" ")
-        st.subheader("Poly")
-        svm_model = SVR(kernel="poly")
-        st.write("Training the Model...")
-        svm_model.fit(X_train, y_train)
+            st.write(" ")
 
-        st.write("Successfully Train the model")
+        elif selectKernel == "Poly":
+            st.subheader("Poly")
+            svm_model = SVR(kernel="poly")
+            st.write("Training the Model...")
+            svm_model.fit(X_train, y_train)
 
-        st.write("SVM", "poly", "Prediction")
-        prediction = svm_model.predict(X_test)
-        st.write("Predicted result for poly Testing Dataset: ")
-        prediction
+            st.write("Successfully Train the model")
 
-        svm = mean_squared_error(y_test,prediction)
-        st.write("mean squared error: for kernel", "poly" , svm)
-        sc= np.round(svm_model.score(X_test, y_test),2)*100
-        st.write("Accuracy score:", sc)
-        from sklearn.metrics import r2_score
-        polyr2=np.round(r2_score(y_test,prediction),2)
-        st.write("R2 score:", polyr2)
+            st.write("SVM", "poly", "Prediction")
+            prediction = svm_model.predict(X_test)
+            st.write("Predicted result for poly Testing Dataset: ")
+            prediction
 
+            svm = mean_squared_error(y_test,prediction)
+            st.write("mean squared error: for kernel", "poly" , svm)
+            sc= np.round(svm_model.score(X_test, y_test),2)*100
+            st.write("Accuracy score:", sc)
 
-        st.write(" ")
-        st.subheader("Sigmoid")
-        svm_model = SVR(kernel="sigmoid")
-        st.write("Training the Model...")
-        svm_model.fit(X_train, y_train)
+            st.write(" ")
+        elif selectKernel == "Sigmoid":
+            st.subheader("Sigmoid")
+            svm_model = SVR(kernel="sigmoid")
+            st.write("Training the Model...")
+            svm_model.fit(X_train, y_train)
 
-        st.write("Successfully Train the model")
+            st.write("Successfully Train the model")
 
-        st.write("SVM", "sigmoid", "Prediction")
-        prediction = svm_model.predict(X_test)
-        st.write("Predicted result for sigmoid Testing Dataset: ")
-        prediction
+            st.write("SVM", "sigmoid", "Prediction")
+            prediction = svm_model.predict(X_test)
+            st.write("Predicted result for sigmoid Testing Dataset: ")
+            prediction
 
-        svm = mean_squared_error(y_test,prediction)
-        st.write("mean squared error: for kernel", "sigmoid", svm)
-        sc= np.round(svm_model.score(X_test, y_test),2)*100
-        st.write("Accuracy score:", sc)
-        from sklearn.metrics import r2_score
-        sigmoidr2=np.round(r2_score(y_test,prediction),2)
-        st.write("R2 score:", sigmoidr2)
+            svm = mean_squared_error(y_test,prediction)
+            st.write("mean squared error: for kernel", "sigmoid", svm)
+            sc= np.round(svm_model.score(X_test, y_test),2)*100
+            st.write("Accuracy score:", sc)
 
 
 
@@ -536,95 +552,88 @@ elif selectDataset == "Commodity":
 #SVM
     elif selectModel == "Support Vector Machine":
 
-        st.subheader("Support Vector Machine age estimation model")
-        st.write(" ")
-        st.subheader("RBF")
-        svm_model = SVR(kernel="rbf")
-        st.write("Training the Model...")
-        svm_model.fit(X_train, y_train)
+        selectKernel = st.sidebar.selectbox ("Select Kernel", options = ["RBF", "Linear", "Sigmoid", "Poly"])
+       
+        if selectKernel == "RBF":
+            st.subheader("Support Vector Machine age estimation model")
+            st.write(" ")
+            st.subheader("RBF")
+            svm_model = SVR(kernel="rbf")
+            st.write("Training the Model...")
+            svm_model.fit(X_train, y_train)
 
-        st.write("Successfully Train the model")
+            st.write("Successfully Train the model")
 
-        st.write("SVM", "rbf", "Prediction")
-        prediction = svm_model.predict(X_test)
-        st.write("Predicted result for RBF Testing Dataset: ")
-        prediction
+            st.write("SVM", "rbf", "Prediction")
+            prediction = svm_model.predict(X_test)
+            st.write("Predicted result for RBF Testing Dataset: ")
+            prediction
 
-        svm = mean_squared_error(y_test,prediction)
-        st.write("mean squared error: for kernel", "rbf" , svm)
+            svm = mean_squared_error(y_test,prediction)
+            st.write("mean squared error: for kernel", "rbf" , svm)
+            
+            sc= np.round(svm_model.score(X_test, y_test),2)*100
+            st.write("Accuracy score:", sc)
 
-        sc= np.round(svm_model.score(X_test, y_test),2)*100
-        st.write("Accuracy score:", sc)
-        from sklearn.metrics import r2_score
-        rbfr2=np.round(r2_score(y_test,prediction),2)
-        st.write("R2 score:", rbfr2)
+            st.write(" ")
 
-        st.write(" ")
-        st.subheader("Linear")
-        svm_model = SVR(kernel="linear")
-        st.write("Training the Model...")
-        svm_model.fit(X_train, y_train)
+        elif selectKernel == "Linear":
+            st.subheader("Linear")
+            svm_model = SVR(kernel="linear")
+            st.write("Training the Model...")
+            svm_model.fit(X_train, y_train)
 
-        st.write("Successfully Train the model")
+            st.write("Successfully Train the model")
 
-        st.write("SVM", "linear", "Prediction")
-        prediction = svm_model.predict(X_test)
-        st.write("Predicted result for linear Testing Dataset: ")
-        prediction
+            st.write("SVM", "linear", "Prediction")
+            prediction = svm_model.predict(X_test)
+            st.write("Predicted result for linear Testing Dataset: ")
+            prediction
 
-        svm = mean_squared_error(y_test,prediction)
-        st.write("mean squared error: for kernel", "linear" , svm)
-        sc= np.round(svm_model.score(X_test, y_test),2)*100
-        st.write("Accuracy score:", sc)
-        from sklearn.metrics import r2_score
-        linearr2=np.round(r2_score(y_test,prediction),2)
-        st.write("R2 score:", linearr2)
-
-
-        st.write(" ")
-        st.subheader("Poly")
-        svm_model = SVR(kernel="poly")
-        st.write("Training the Model...")
-        svm_model.fit(X_train, y_train)
-
-        st.write("Successfully Train the model")
-
-        st.write("SVM", "poly", "Prediction")
-        prediction = svm_model.predict(X_test)
-        st.write("Predicted result for poly Testing Dataset: ")
-        prediction
-
-        svm = mean_squared_error(y_test,prediction)
-        st.write("mean squared error: for kernel", "poly" , svm)
-        sc= np.round(svm_model.score(X_test, y_test),2)*100
-        st.write("Accuracy score:", sc)
-        from sklearn.metrics import r2_score
-        polyr2=np.round(r2_score(y_test,prediction),2)
-        st.write("R2 score:", polyr2)
-
-        
+            svm = mean_squared_error(y_test,prediction)
+            st.write("mean squared error: for kernel", "linear" , svm)
+            sc= np.round(svm_model.score(X_test, y_test),2)*100
+            st.write("Accuracy score:", sc)
 
 
-        st.write(" ")
-        st.subheader("Sigmoid")
-        svm_model = SVR(kernel="sigmoid")
-        st.write("Training the Model...")
-        svm_model.fit(X_train, y_train)
+            st.write(" ")
 
-        st.write("Successfully Train the model")
+        elif selectKernel == "Poly":
+            st.subheader("Poly")
+            svm_model = SVR(kernel="poly")
+            st.write("Training the Model...")
+            svm_model.fit(X_train, y_train)
 
-        st.write("SVM", "sigmoid", "Prediction")
-        prediction = svm_model.predict(X_test)
-        st.write("Predicted result for sigmoid Testing Dataset: ")
-        prediction
+            st.write("Successfully Train the model")
 
-        svm = mean_squared_error(y_test,prediction)
-        st.write("mean squared error: for kernel", "sigmoid", svm)
-        sc= np.round(svm_model.score(X_test, y_test),2)*100
-        st.write("Accuracy score:", sc)
-        from sklearn.metrics import r2_score
-        sigmoidr2=np.round(r2_score(y_test,prediction),2)
-        st.write("R2 score:", sigmoidr2)
+            st.write("SVM", "poly", "Prediction")
+            prediction = svm_model.predict(X_test)
+            st.write("Predicted result for poly Testing Dataset: ")
+            prediction
+
+            svm = mean_squared_error(y_test,prediction)
+            st.write("mean squared error: for kernel", "poly" , svm)
+            sc= np.round(svm_model.score(X_test, y_test),2)*100
+            st.write("Accuracy score:", sc)
+
+            st.write(" ")
+        elif selectKernel == "Sigmoid":
+            st.subheader("Sigmoid")
+            svm_model = SVR(kernel="sigmoid")
+            st.write("Training the Model...")
+            svm_model.fit(X_train, y_train)
+
+            st.write("Successfully Train the model")
+
+            st.write("SVM", "sigmoid", "Prediction")
+            prediction = svm_model.predict(X_test)
+            st.write("Predicted result for sigmoid Testing Dataset: ")
+            prediction
+
+            svm = mean_squared_error(y_test,prediction)
+            st.write("mean squared error: for kernel", "sigmoid", svm)
+            sc= np.round(svm_model.score(X_test, y_test),2)*100
+            st.write("Accuracy score:", sc)
 
 
 
@@ -640,6 +649,11 @@ elif selectDataset == "Cryptocurrency":
     st.subheader("Data input for Cryptocurrency")
     data_input_training = coin_dataset.drop(columns = ["unix","symbol","date","close"])
     data_input_training
+
+    missing_values = data_input_training.isnull().sum()
+
+    st.subheader("Missing Values:")
+    st.write(missing_values)
 
     st.subheader("Data target for Cryprocurrency")
     data_target_training = coin_dataset['close']
@@ -718,95 +732,88 @@ elif selectDataset == "Cryptocurrency":
 #SVM
     elif selectModel == "Support Vector Machine":
 
-        st.subheader("Support Vector Machine age estimation model")
-        st.write(" ")
-        st.subheader("RBF")
-        svm_model = SVR(kernel="rbf")
-        st.write("Training the Model...")
-        svm_model.fit(X_train, y_train)
+        selectKernel = st.sidebar.selectbox ("Select Kernel", options = ["RBF", "Linear", "Sigmoid", "Poly"])
+       
+        if selectKernel == "RBF":
+            st.subheader("Support Vector Machine age estimation model")
+            st.write(" ")
+            st.subheader("RBF")
+            svm_model = SVR(kernel="rbf")
+            st.write("Training the Model...")
+            svm_model.fit(X_train, y_train)
 
-        st.write("Successfully Train the model")
+            st.write("Successfully Train the model")
 
-        st.write("SVM", "rbf", "Prediction")
-        prediction = svm_model.predict(X_test)
-        st.write("Predicted result for RBF Testing Dataset: ")
-        prediction
+            st.write("SVM", "rbf", "Prediction")
+            prediction = svm_model.predict(X_test)
+            st.write("Predicted result for RBF Testing Dataset: ")
+            prediction
 
-        svm = mean_squared_error(y_test,prediction)
-        st.write("mean squared error: for kernel", "rbf" , svm)
+            svm = mean_squared_error(y_test,prediction)
+            st.write("mean squared error: for kernel", "rbf" , svm)
+            
+            sc= np.round(svm_model.score(X_test, y_test),2)*100
+            st.write("Accuracy score:", sc)
 
-        sc= np.round(svm_model.score(X_test, y_test),2)*100
-        st.write("Accuracy score:", sc)
-        from sklearn.metrics import r2_score
-        rbfr2=np.round(r2_score(y_test,prediction),2)
-        st.write("R2 score:", rbfr2)
+            st.write(" ")
 
-        st.write(" ")
-        st.subheader("Linear")
-        svm_model = SVR(kernel="linear")
-        st.write("Training the Model...")
-        svm_model.fit(X_train, y_train)
+        elif selectKernel == "Linear":
+            st.subheader("Linear")
+            svm_model = SVR(kernel="linear")
+            st.write("Training the Model...")
+            svm_model.fit(X_train, y_train)
 
-        st.write("Successfully Train the model")
+            st.write("Successfully Train the model")
 
-        st.write("SVM", "linear", "Prediction")
-        prediction = svm_model.predict(X_test)
-        st.write("Predicted result for linear Testing Dataset: ")
-        prediction
+            st.write("SVM", "linear", "Prediction")
+            prediction = svm_model.predict(X_test)
+            st.write("Predicted result for linear Testing Dataset: ")
+            prediction
 
-        svm = mean_squared_error(y_test,prediction)
-        st.write("mean squared error: for kernel", "linear" , svm)
-        sc= np.round(svm_model.score(X_test, y_test),2)*100
-        st.write("Accuracy score:", sc)
-        from sklearn.metrics import r2_score
-        linearr2=np.round(r2_score(y_test,prediction),2)
-        st.write("R2 score:", linearr2)
-
-
-        st.write(" ")
-        st.subheader("Poly")
-        svm_model = SVR(kernel="poly")
-        st.write("Training the Model...")
-        svm_model.fit(X_train, y_train)
-
-        st.write("Successfully Train the model")
-
-        st.write("SVM", "poly", "Prediction")
-        prediction = svm_model.predict(X_test)
-        st.write("Predicted result for poly Testing Dataset: ")
-        prediction
-
-        svm = mean_squared_error(y_test,prediction)
-        st.write("mean squared error: for kernel", "poly" , svm)
-        sc= np.round(svm_model.score(X_test, y_test),2)*100
-        st.write("Accuracy score:", sc)
-        from sklearn.metrics import r2_score
-        polyr2=np.round(r2_score(y_test,prediction),2)
-        st.write("R2 score:", polyr2)
-
-        
+            svm = mean_squared_error(y_test,prediction)
+            st.write("mean squared error: for kernel", "linear" , svm)
+            sc= np.round(svm_model.score(X_test, y_test),2)*100
+            st.write("Accuracy score:", sc)
 
 
-        st.write(" ")
-        st.subheader("Sigmoid")
-        svm_model = SVR(kernel="sigmoid")
-        st.write("Training the Model...")
-        svm_model.fit(X_train, y_train)
+            st.write(" ")
 
-        st.write("Successfully Train the model")
+        elif selectKernel == "Poly":
+            st.subheader("Poly")
+            svm_model = SVR(kernel="poly")
+            st.write("Training the Model...")
+            svm_model.fit(X_train, y_train)
 
-        st.write("SVM", "sigmoid", "Prediction")
-        prediction = svm_model.predict(X_test)
-        st.write("Predicted result for sigmoid Testing Dataset: ")
-        prediction
+            st.write("Successfully Train the model")
 
-        svm = mean_squared_error(y_test,prediction)
-        st.write("mean squared error: for kernel", "sigmoid", svm)
-        sc= np.round(svm_model.score(X_test, y_test),2)*100
-        st.write("Accuracy score:", sc)
-        from sklearn.metrics import r2_score
-        sigmoidr2=np.round(r2_score(y_test,prediction),2)
-        st.write("R2 score:", sigmoidr2)
+            st.write("SVM", "poly", "Prediction")
+            prediction = svm_model.predict(X_test)
+            st.write("Predicted result for poly Testing Dataset: ")
+            prediction
+
+            svm = mean_squared_error(y_test,prediction)
+            st.write("mean squared error: for kernel", "poly" , svm)
+            sc= np.round(svm_model.score(X_test, y_test),2)*100
+            st.write("Accuracy score:", sc)
+
+            st.write(" ")
+        elif selectKernel == "Sigmoid":
+            st.subheader("Sigmoid")
+            svm_model = SVR(kernel="sigmoid")
+            st.write("Training the Model...")
+            svm_model.fit(X_train, y_train)
+
+            st.write("Successfully Train the model")
+
+            st.write("SVM", "sigmoid", "Prediction")
+            prediction = svm_model.predict(X_test)
+            st.write("Predicted result for sigmoid Testing Dataset: ")
+            prediction
+
+            svm = mean_squared_error(y_test,prediction)
+            st.write("mean squared error: for kernel", "sigmoid", svm)
+            sc= np.round(svm_model.score(X_test, y_test),2)*100
+            st.write("Accuracy score:", sc)
 
 
 
@@ -824,6 +831,11 @@ elif selectDataset == "Futures":
     st.subheader("Data input for Futures")
     data_input_training = re_dataset.drop(columns = ["Close","Date"])
     data_input_training
+
+    missing_values = data_input_training.isnull().sum()
+
+    st.subheader("Missing Values:")
+    st.write(missing_values)
 
     st.subheader("Data target for Futures")
     data_target_training = re_dataset['Close']
@@ -903,92 +915,85 @@ elif selectDataset == "Futures":
 #SVM
     elif selectModel == "Support Vector Machine":
 
-        st.subheader("Support Vector Machine age estimation model")
-        st.write(" ")
-        st.subheader("RBF")
-        svm_model = SVR(kernel="rbf")
-        st.write("Training the Model...")
-        svm_model.fit(X_train, y_train)
+        selectKernel = st.sidebar.selectbox ("Select Kernel", options = ["RBF", "Linear", "Sigmoid", "Poly"])
+       
+        if selectKernel == "RBF":
+            st.subheader("Support Vector Machine age estimation model")
+            st.write(" ")
+            st.subheader("RBF")
+            svm_model = SVR(kernel="rbf")
+            st.write("Training the Model...")
+            svm_model.fit(X_train, y_train)
 
-        st.write("Successfully Train the model")
+            st.write("Successfully Train the model")
 
-        st.write("SVM", "rbf", "Prediction")
-        prediction = svm_model.predict(X_test)
-        st.write("Predicted result for RBF Testing Dataset: ")
-        prediction
+            st.write("SVM", "rbf", "Prediction")
+            prediction = svm_model.predict(X_test)
+            st.write("Predicted result for RBF Testing Dataset: ")
+            prediction
 
-        svm = mean_squared_error(y_test,prediction)
-        st.write("mean squared error: for kernel", "rbf" , svm)
+            svm = mean_squared_error(y_test,prediction)
+            st.write("mean squared error: for kernel", "rbf" , svm)
+            
+            sc= np.round(svm_model.score(X_test, y_test),2)*100
+            st.write("Accuracy score:", sc)
 
-        sc= np.round(svm_model.score(X_test, y_test),2)*100
-        st.write("Accuracy score:", sc)
-        from sklearn.metrics import r2_score
-        rbfr2=np.round(r2_score(y_test,prediction),2)
-        st.write("R2 score:", rbfr2)
+            st.write(" ")
 
-        st.write(" ")
-        st.subheader("Linear")
-        svm_model = SVR(kernel="linear")
-        st.write("Training the Model...")
-        svm_model.fit(X_train, y_train)
+        elif selectKernel == "Linear":
+            st.subheader("Linear")
+            svm_model = SVR(kernel="linear")
+            st.write("Training the Model...")
+            svm_model.fit(X_train, y_train)
 
-        st.write("Successfully Train the model")
+            st.write("Successfully Train the model")
 
-        st.write("SVM", "linear", "Prediction")
-        prediction = svm_model.predict(X_test)
-        st.write("Predicted result for linear Testing Dataset: ")
-        prediction
+            st.write("SVM", "linear", "Prediction")
+            prediction = svm_model.predict(X_test)
+            st.write("Predicted result for linear Testing Dataset: ")
+            prediction
 
-        svm = mean_squared_error(y_test,prediction)
-        st.write("mean squared error: for kernel", "linear" , svm)
-        sc= np.round(svm_model.score(X_test, y_test),2)*100
-        st.write("Accuracy score:", sc)
-        from sklearn.metrics import r2_score
-        linearr2=np.round(r2_score(y_test,prediction),2)
-        st.write("R2 score:", linearr2)
-
-
-        st.write(" ")
-        st.subheader("Poly")
-        svm_model = SVR(kernel="poly")
-        st.write("Training the Model...")
-        svm_model.fit(X_train, y_train)
-
-        st.write("Successfully Train the model")
-
-        st.write("SVM", "poly", "Prediction")
-        prediction = svm_model.predict(X_test)
-        st.write("Predicted result for poly Testing Dataset: ")
-        prediction
-
-        svm = mean_squared_error(y_test,prediction)
-        st.write("mean squared error: for kernel", "poly" , svm)
-        sc= np.round(svm_model.score(X_test, y_test),2)*100
-        st.write("Accuracy score:", sc)
-        from sklearn.metrics import r2_score
-        polyr2=np.round(r2_score(y_test,prediction),2)
-        st.write("R2 score:", polyr2)
-
-        
+            svm = mean_squared_error(y_test,prediction)
+            st.write("mean squared error: for kernel", "linear" , svm)
+            sc= np.round(svm_model.score(X_test, y_test),2)*100
+            st.write("Accuracy score:", sc)
 
 
-        st.write(" ")
-        st.subheader("Sigmoid")
-        svm_model = SVR(kernel="sigmoid")
-        st.write("Training the Model...")
-        svm_model.fit(X_train, y_train)
+            st.write(" ")
 
-        st.write("Successfully Train the model")
+        elif selectKernel == "Poly":
+            st.subheader("Poly")
+            svm_model = SVR(kernel="poly")
+            st.write("Training the Model...")
+            svm_model.fit(X_train, y_train)
 
-        st.write("SVM", "sigmoid", "Prediction")
-        prediction = svm_model.predict(X_test)
-        st.write("Predicted result for sigmoid Testing Dataset: ")
-        prediction
+            st.write("Successfully Train the model")
 
-        svm = mean_squared_error(y_test,prediction)
-        st.write("mean squared error: for kernel", "sigmoid", svm)
-        sc= np.round(svm_model.score(X_test, y_test),2)*100
-        st.write("Accuracy score:", sc)
-        from sklearn.metrics import r2_score
-        sigmoidr2=np.round(r2_score(y_test,prediction),2)
-        st.write("R2 score:", sigmoidr2)
+            st.write("SVM", "poly", "Prediction")
+            prediction = svm_model.predict(X_test)
+            st.write("Predicted result for poly Testing Dataset: ")
+            prediction
+
+            svm = mean_squared_error(y_test,prediction)
+            st.write("mean squared error: for kernel", "poly" , svm)
+            sc= np.round(svm_model.score(X_test, y_test),2)*100
+            st.write("Accuracy score:", sc)
+
+            st.write(" ")
+        elif selectKernel == "Sigmoid":
+            st.subheader("Sigmoid")
+            svm_model = SVR(kernel="sigmoid")
+            st.write("Training the Model...")
+            svm_model.fit(X_train, y_train)
+
+            st.write("Successfully Train the model")
+
+            st.write("SVM", "sigmoid", "Prediction")
+            prediction = svm_model.predict(X_test)
+            st.write("Predicted result for sigmoid Testing Dataset: ")
+            prediction
+
+            svm = mean_squared_error(y_test,prediction)
+            st.write("mean squared error: for kernel", "sigmoid", svm)
+            sc= np.round(svm_model.score(X_test, y_test),2)*100
+            st.write("Accuracy score:", sc)
